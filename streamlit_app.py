@@ -32,7 +32,8 @@ selected_view = st.sidebar.selectbox(
         'Platform Popularity',
         'Average Sales per Genre',
         'Top 10 Games by Genre',
-        'Games Released Over Time'
+        'Games Released Over Time',
+        'Console Library'
     ]
 )
 
@@ -121,5 +122,11 @@ elif selected_view == 'Games Released Over Time':
     games_per_year.columns = ['Year', 'Number of Games']
     fig = px.line(games_per_year, x='Year', y='Number of Games', title='Games Released Over Time')
     st.plotly_chart(fig)
+
+elif selected_view == 'Console Library':
+    st.header('Console Library')
+    selected_console = st.selectbox('Select Console', data['Console_name'].unique())
+    console_data = data[data['Console_name'] == selected_console]
+    st.write(console_data)
 
 # Optional: Add more plots and interactivity
