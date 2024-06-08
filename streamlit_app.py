@@ -1,50 +1,125 @@
-import streamlit as st
-import numpy as np
 import pandas as pd
-import altair as alt
+import streamlit as st
+import plotly.express as px
 
-# Page title
-st.set_page_config(page_title='Interactive Data Explorer', page_icon='📊')
-st.title('📊 Interactive Data Explorer')
+# Load the data
+@st.cache_data
+def load_data():
+    return pd.read_csv('data/combined_data.csv')
 
-with st.expander('About this app'):
-  st.markdown('**What can this app do?**')
-  st.info('This app shows the use of Pandas for data wrangling, Altair for chart creation and editable dataframe for data interaction.')
-  st.markdown('**How to use the app?**')
-  st.warning('To engage with the app, 1. Select genres of your interest in the drop-down selection box and then 2. Select the year duration from the slider widget. As a result, this should generate an updated editable DataFrame and line plot.')
-  
-st.subheader('Which Movie Genre performs ($) best at the box office?')
+data = load_data()
 
-# Load data
-df = pd.read_csv('data/movies_genres_summary.csv')
-df.year = df.year.astype('int')
+# Ensure 'Copies sold' is numeric and handle any potential issues
+data['Copies sold'] = pd.to_numeric(data['Copies sold'].str.replace('[^\d.]', '', regex=True), errors='coerce')
+data = data.dropna(subset=['Copies sold'])  # Drop rows where conversion failed
 
-# Input widgets
-## Genres selection
-genres_list = df.genre.unique()
-genres_selection = st.multiselect('Select genres', genres_list, ['Action', 'Adventure', 'Biography', 'Comedy', 'Drama', 'Horror'])
+# Streamlit app
+st.title('EDA Dashboard')
 
-## Year selection
-year_list = df.year.unique()
-year_selection = st.slider('Select year duration', 1986, 2006, (2000, 2016))
-year_selection_list = list(np.arange(year_selection[0], year_selection[1]+1))
+# Sidebar for user input
+st.sidebar.header('User Input')
+selected_view = st.sidebar.selectbox(
+    'Select a view',
+    [
+        'Top Developers', 
+        'Top Games by Copies Sold', 
+        'Yearly Sales', 
+        'Genre Spectrum', 
+        'Publisher Sales', 
+        'Console Sales', 
+        'Top Publishers by Genre',
+        'Sales Distribution by Year',
+        'Platform Popularity',
+        'Average Sales per Genre',
+        'Top 10 Games by Genre',
+        'Games Released Over Time'
+    ]
+)
 
-df_selection = df[df.genre.isin(genres_selection) & df['year'].isin(year_selection_list)]
-reshaped_df = df_selection.pivot_table(index='year', columns='genre', values='gross', aggfunc='sum', fill_value=0)
-reshaped_df = reshaped_df.sort_values(by='year', ascending=False)
+# Display the selected view
+if selected_view == 'Top Developers':
+    st.header('Top Developers')
+    developer_counts = data['Developer'].value_counts().reset_index()
+    developer_counts.columns = ['Developer', 'Count']
+    st.write(developer_counts)
 
+elif selected_view == 'Top Games by Copies Sold':
+    st.header('Top Games by Copies Sold')
+    top_games = data.groupby('Game', as_index=False)['Copies sold'].sum().nlargest(10, 'Copies sold')
+    fig = px.bar(top_games, x='Game', y='Copies sold', title='Top Games by Copies Sold')
+    st.plotly_chart(fig)
+    st.write(top_games[['Game', 'Copies sold']])
 
-# Display DataFrame
+elif selected_view == 'Yearly Sales':
+    st.header('Yearly Sales')
+    data['Release date'] = pd.to_datetime(data['Release date'])
+    data['Year'] = data['Release date'].dt.year
+    yearly_sales = data.groupby('Year')['Copies sold'].sum().reset_index()
+    fig = px.bar(yearly_sales, x='Year', y='Copies sold', title='Yearly Sales')
+    st.plotly_chart(fig)
 
-df_editor = st.data_editor(reshaped_df, height=212, use_container_width=True,
-                            column_config={"year": st.column_config.TextColumn("Year")},
-                            num_rows="dynamic")
-df_chart = pd.melt(df_editor.reset_index(), id_vars='year', var_name='genre', value_name='gross')
+elif selected_view == 'Genre Spectrum':
+    st.header('Genre Spectrum')
+    genre_counts = data['Genre'].value_counts().reset_index()
+    genre_counts.columns = ['Genre', 'Count']
+    fig = px.pie(genre_counts, values='Count', names='Genre', title='Genre Spectrum', 
+                 hole=0.3, hover_data=['Count'], labels={'Count':'Number of Games'})
+    fig.update_traces(textposition='inside', textinfo='percent+label')
+    st.plotly_chart(fig)
 
-# Display chart
-chart = alt.Chart(df_chart).mark_line().encode(
-            x=alt.X('year:N', title='Year'),
-            y=alt.Y('gross:Q', title='Gross earnings ($)'),
-            color='genre:N'
-            ).properties(height=320)
-st.altair_chart(chart, use_container_width=True)
+elif selected_view == 'Publisher Sales':
+    st.header('Publisher Sales')
+    publisher_sales = data.groupby('Publisher')['Copies sold'].sum().reset_index()
+    publisher_sales = publisher_sales.sort_values('Copies sold', ascending=False).head(20)  # Show only top 20 publishers
+    fig = px.bar(publisher_sales, x='Copies sold', y='Publisher', title='Publisher Sales', orientation='h')
+    st.plotly_chart(fig)
+
+elif selected_view == 'Console Sales':
+    st.header('Console Sales')
+    console_sales = data.groupby('Console_name')['Copies sold'].sum().reset_index()
+    console_sales = console_sales.sort_values('Copies sold', ascending=False)
+    fig = px.bar(console_sales, x='Console_name', y='Copies sold', title='Console Sales')
+    st.plotly_chart(fig)
+
+elif selected_view == 'Top Publishers by Genre':
+    st.header('Top Publishers by Genre')
+    genre_publisher = data.groupby(['Genre', 'Publisher'])['Copies sold'].sum().reset_index()
+    fig = px.sunburst(genre_publisher, path=['Genre', 'Publisher'], values='Copies sold', title='Top Publishers by Genre')
+    st.plotly_chart(fig)
+
+elif selected_view == 'Sales Distribution by Year':
+    st.header('Sales Distribution by Year')
+    data['Release date'] = pd.to_datetime(data['Release date'])
+    data['Year'] = data['Release date'].dt.year
+    fig = px.box(data, x='Year', y='Copies sold', title='Sales Distribution by Year')
+    st.plotly_chart(fig)
+
+elif selected_view == 'Platform Popularity':
+    st.header('Platform Popularity')
+    platform_counts = data['Console_name'].value_counts().reset_index()
+    platform_counts.columns = ['Console_name', 'Count']
+    st.write(platform_counts)
+
+elif selected_view == 'Average Sales per Genre':
+    st.header('Average Sales per Genre')
+    avg_sales_genre = data.groupby('Genre')['Copies sold'].mean().reset_index()
+    fig = px.bar(avg_sales_genre, x='Genre', y='Copies sold', title='Average Sales per Genre')
+    st.plotly_chart(fig)
+
+elif selected_view == 'Top 10 Games by Genre':
+    st.header('Top 10 Games by Genre')
+    selected_genre = st.selectbox('Select Genre', data['Genre'].unique())
+    top_games_genre = data[data['Genre'] == selected_genre].nlargest(10, 'Copies sold')
+    fig = px.bar(top_games_genre, x='Game', y='Copies sold', title=f'Top 10 Games in {selected_genre}')
+    st.plotly_chart(fig)
+
+elif selected_view == 'Games Released Over Time':
+    st.header('Games Released Over Time')
+    data['Release date'] = pd.to_datetime(data['Release date'])
+    data['Year'] = data['Release date'].dt.year
+    games_per_year = data['Year'].value_counts().sort_index().reset_index()
+    games_per_year.columns = ['Year', 'Number of Games']
+    fig = px.line(games_per_year, x='Year', y='Number of Games', title='Games Released Over Time')
+    st.plotly_chart(fig)
+
+# Optional: Add more plots and interactivity
