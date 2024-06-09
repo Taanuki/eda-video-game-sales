@@ -68,7 +68,31 @@ Main Dashboard Area
 -Top 10 Games by Genre: I can select a genre to see the top 10 games within that genre.
 -Games Released Over Time: I can track the number of games released each year with a line chart.
 -Console Library: I can select a console to view detailed information about the games available for that platform.
+Search for a Game or Developer:
 
+Type: Text Input
+Explanation: Allows users to filter the data by typing in the name of a specific game or developer. This helps in quickly finding relevant information without manually browsing through the entire dataset.
+Exclude Publisher Data:
+
+Type: Checkbox
+Explanation: Gives users the option to exclude publisher information from the visualizations. This is useful if the focus is on other aspects of the data, such as game sales or genres.
+Select All Genres:
+
+Type: Checkbox with Multiselect
+Explanation: Provides a checkbox to select all genres at once, along with a multiselect dropdown to choose specific genres. This feature makes it easier to filter data by multiple genres without having to select each one individually.
+Top Games by Copies Sold - Number of Games to Display:
+
+Type: Slider
+Explanation: Allows users to adjust the number of top games displayed in the visualization. Users can slide to select a specific number of games, ranging from 5 to 50, making it easy to view the top N games by copies sold.
+Top Publishers by Sales - Number of Publishers to Display:
+
+Type: Slider
+Explanation: Lets users control the number of top publishers displayed in the visualization. The slider ranges from 5 to 50, enabling users to focus on the top publishers by sales.
+Download CSV:
+
+Type: Download Button
+Explanation: Allows users to download the filtered dataset in CSV format for further analysis. This is especially useful for users who want to perform additional analysis or keep a record of the filtered data.
+These interactive options, including the sliders, enhance the usability of the dashboard by allowing users to tailor the data visualization to their specific needs and preferences.
 
 Download Filtered Data
 Download CSV: After applying filters and adjustments, I can download the filtered dataset in CSV format for further analysis. This feature is available in the sidebar under "Download Filtered Data."
