@@ -37,6 +37,30 @@ selected_view = st.sidebar.selectbox(
     ]
 )
 
+# Add more interactive widgets
+search_term = st.sidebar.text_input('Search for a game or developer')
+exclude_publisher = st.sidebar.checkbox('Exclude Publisher Data')
+
+# "Select All" functionality for genres
+all_genres = data['Genre'].unique().tolist()
+select_all_genres = st.sidebar.checkbox('Select All Genres')
+
+if select_all_genres:
+    selected_genres = st.sidebar.multiselect('Select Genres', options=all_genres, default=all_genres)
+else:
+    selected_genres = st.sidebar.multiselect('Select Genres', options=all_genres, default=[])
+
+# Filter data based on user input
+if search_term:
+    data = data[data['Game'].str.contains(search_term, case=False, na=False) | data['Developer'].str.contains(search_term, case=False, na=False)]
+
+if exclude_publisher:
+    data = data.drop(columns=['Publisher'], errors='ignore')
+
+# Filter by selected genres
+if selected_genres:
+    data = data[data['Genre'].isin(selected_genres)]
+
 # Display the selected view
 if selected_view == 'Top Developers':
     st.header('Top Developers')
@@ -46,7 +70,8 @@ if selected_view == 'Top Developers':
 
 elif selected_view == 'Top Games by Copies Sold':
     st.header('Top Games by Copies Sold')
-    top_games = data.groupby('Game', as_index=False)['Copies sold'].sum().nlargest(10, 'Copies sold')
+    num_top_games = st.slider('Select number of top games to display', 5, 50, 10)
+    top_games = data.groupby('Game', as_index=False)['Copies sold'].sum().nlargest(num_top_games, 'Copies sold')
     fig = px.bar(top_games, x='Game', y='Copies sold', title='Top Games by Copies Sold')
     st.plotly_chart(fig)
     st.write(top_games[['Game', 'Copies sold']])
@@ -70,8 +95,9 @@ elif selected_view == 'Genre Spectrum':
 
 elif selected_view == 'Publisher Sales':
     st.header('Publisher Sales')
+    num_top_publishers = st.slider('Select number of top publishers to display', 5, 50, 20)
     publisher_sales = data.groupby('Publisher')['Copies sold'].sum().reset_index()
-    publisher_sales = publisher_sales.sort_values('Copies sold', ascending=False).head(20)  # Show only top 20 publishers
+    publisher_sales = publisher_sales.sort_values('Copies sold', ascending=False).head(num_top_publishers)
     fig = px.bar(publisher_sales, x='Copies sold', y='Publisher', title='Publisher Sales', orientation='h')
     st.plotly_chart(fig)
 
@@ -130,3 +156,14 @@ elif selected_view == 'Console Library':
     st.write(console_data)
 
 # Optional: Add more plots and interactivity
+
+# Add a button to download the filtered dataset
+st.sidebar.markdown("---")
+st.sidebar.header('Download Filtered Data')
+csv = data.to_csv(index=False).encode('utf-8')
+st.sidebar.download_button(
+    label='Download CSV',
+    data=csv,
+    file_name='filtered_data.csv',
+    mime='text/csv',
+)

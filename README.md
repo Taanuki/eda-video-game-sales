@@ -42,3 +42,36 @@ To set up the project locally, follow these steps:
    ```bash
    git clone https://github.com/yourusername/video-game-sales-analysis.git
    cd video-game-sales-analysis
+
+
+Interactive Features of the EDA Dashboard
+Welcome to my EDA Dashboard for Video Game Sales! I've designed this dashboard to provide you with insightful visualizations and a dynamic user experience. Here are the interactive features you can use to explore the data more effectively:
+
+User Input Sidebar
+-Select a View: I can choose from a variety of views to analyze different aspects of the video game sales data. Options include Top Developers, Top Games by Copies Sold, Yearly Sales, Genre Spectrum, Publisher Sales, Console Sales, and more.
+-Search for a Game or Developer: I can use this text input box to filter the data by specific games or developers. Simply type in the name or partial name, and the dashboard will update to show relevant results.
+-Exclude Publisher Data: This checkbox allows me to exclude publisher information from the visualizations if I prefer to focus on other data aspects.
+-Select Genres: I can use the multiselect box to filter data by one or more genres. I can select specific genres that interest me. Additionally, there's a "Select All Genres" checkbox that, when selected, automatically includes all genres in the analysis.
+
+
+Main Dashboard Area
+-Top Developers: I can view a list of the top game developers based on the number of games they have developed.
+-Top Games by Copies Sold: I can explore the top-selling games with an adjustable slider to control the number of games displayed.
+-Yearly Sales: I can analyze yearly sales trends with bar charts, helping me identify peaks and patterns over the years.
+-Genre Spectrum: I can visualize the distribution of game genres with an interactive pie chart, providing a clear view of the most popular genres.
+-Publisher Sales: I can examine sales data of the top publishers, with a slider to adjust the number of top publishers displayed.
+-Console Sales: I can see which consoles have sold the most games with a detailed bar chart.
+-Top Publishers by Genre: I can discover the leading publishers in each genre with a sunburst chart.
+-Sales Distribution by Year: I can understand the spread of sales data over the years using a box plot.
+-Platform Popularity: I can review the popularity of different gaming platforms.
+-Average Sales per Genre: I can view the average sales per genre with a bar chart.
+-Top 10 Games by Genre: I can select a genre to see the top 10 games within that genre.
+-Games Released Over Time: I can track the number of games released each year with a line chart.
+-Console Library: I can select a console to view detailed information about the games available for that platform.
+
+
+Download Filtered Data
+Download CSV: After applying filters and adjustments, I can download the filtered dataset in CSV format for further analysis. This feature is available in the sidebar under "Download Filtered Data."
+
+
+I hope these interactive features enhance your experience and provide valuable insights into the video game sales data. Happy exploring!
